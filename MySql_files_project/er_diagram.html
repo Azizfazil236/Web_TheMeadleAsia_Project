@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ER Şeması - Bilge Nesil Teknoloji Merkezi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .er-diagram {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        
+        .tables-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .table-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 3px solid;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .table-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .table-box.primary { border-color: #e74c3c; }
+        .table-box.secondary { border-color: #3498db; }
+        .table-box.tertiary { border-color: #2ecc71; }
+        .table-box.quaternary { border-color: #f39c12; }
+        .table-box.quinary { border-color: #9b59b6; }
+        
+        .table-header {
+            padding: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        
+        .primary .table-header { background: #e74c3c; }
+        .secondary .table-header { background: #3498db; }
+        .tertiary .table-header { background: #2ecc71; }
+        .quaternary .table-header { background: #f39c12; }
+        .quinary .table-header { background: #9b59b6; }
+        
+        .table-fields {
+            padding: 20px;
+        }
+        
+        .field {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 6px;
+            background: #f8f9fa;
+            border-left: 4px solid #dee2e6;
+            font-size: 0.9em;
+        }
+        
+        .field.pk {
+            background: #fff3cd;
+            border-left-color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .field.fk {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        .field-type {
+            color: #6c757d;
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+        
+        .relationships {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .relationships h3 {
+            color: #2c3e50;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .relationship {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .relationship span {
+            margin: 0 15px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .arrow {
+            color: #3498db;
+            font-size: 1.2em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .tables-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .er-diagram {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ بیلگه نسل تكنولوژی مركزی</h1>
+            <p>Asya-yı Miyane Bilge Nesil Teknoloji Merkezi - Veritabanı ER Şeması</p>
+        </div>
+        
+        <div class="er-diagram">
+            <div class="tables-container">
+                <!-- Öğrenciler Tablosu -->
+                <div class="table-box primary">
+                    <div class="table-header">
+                        👨‍🎓 ÖĞRENCILER
+                    </div>
+                    <div class="table-fields">
+                        <div class="field pk">
+                            <span>ogrenci_id</span>
+                            <span class="field-type">INT (PK)</span>
+                        </div>
+                        <div class="field">
+                            <span>ad</span>
+                            <span class="field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="field">
+                            <span>soyad</span>
+                            <span class="field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="field">
+                            <span>baba_adi</span>
+                            <span class="field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="field">
+                            <span>dogum_tarihi</span>
+                            <span class="field-type">DATE</span>
+                        </div>
+                        <div class="field">
+                            <span>yas</span>
+                            <span class="field-type">INT</span>
+                        </div>
+                        <div class="field">
+                            <span>cinsiyet</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>telefon</span>
+                            <span class="field-type">VARCHAR(20)</span>
+                        </div>
+                        <div class="field">
+                            <span>adres</span>
+                            <span class="field-type">TEXT</span>
+                        </div>
+                        <div class="field">
+                            <span>sehir</span>
+                            <span class="field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="field">
+                            <span>veli_adi</span>
+                            <span class="field-type">VARCHAR(100)</span>
+                        </div>
+                        <div class="field">
+                            <span>veli_telefon</span>
+                            <span class="field-type">VARCHAR(20)</span>
+                        </div>
+                        <div class="field">
+                            <span>egitim_seviyesi</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>teknoloji_seviyesi</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>kayit_tarihi</span>
+                            <span class="field-type">DATETIME</span>
+                        </div>
+                        <div class="field">
+                            <span>durum</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Eğitmenler Tablosu -->
+                <div class="table-box secondary">
+                    <div class="table-header">
+                        👨‍🏫 EĞİTMENLER
+                    </div>
+                    <div class="table-fields">
+                        <div class="field pk">
+                            <span>egitmen_id</span>
+                            <span class="field-type">INT (PK)</span>
+                        </div>
+                        <div class="field">
+                            <span>ad</span>
+                            <span class="field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="field">
+                            <span>soyad</span>
+                            <span class="field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="field">
+                            <span>telefon</span>
+                            <span class="field-type">VARCHAR(20)</span>
+                        </div>
+                        <div class="field">
+                            <span>email</span>
+                            <span class="field-type">VARCHAR(100)</span>
+                        </div>
+                        <div class="field">
+                            <span>mezun_universite</span>
+                            <span class="field-type">VARCHAR(100)</span>
+                        </div>
+                        <div class="field">
+                            <span>fakulte</span>
+                            <span class="field-type">VARCHAR(100)</span>
+                        </div>
+                        <div class="field">
+                            <span>bolum</span>
+                            <span class="field-type">VARCHAR(100)</span>
+                        </div>
+                        <div class="field">
+                            <span>uzmanlik_alani_1</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>uzmanlik_alani_2</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>programlama_dilleri</span>
+                            <span class="field-type">TEXT</span>
+                        </div>
+                        <div class="field">
+                            <span>pozisyon</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>durum</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kurslar Tablosu -->
+                <div class="table-box tertiary">
+                    <div class="table-header">
+                        📚 KURSLAR
+                    </div>
+                    <div class="table-fields">
+                        <div class="field pk">
+                            <span>kurs_id</span>
+                            <span class="field-type">INT (PK)</span>
+                        </div>
+                        <div class="field">
+                            <span>kurs_adi</span>
+                            <span class="field-type">VARCHAR(100)</span>
+                        </div>
+                        <div class="field">
+                            <span>kurs_kodu</span>
+                            <span class="field-type">VARCHAR(20)</span>
+                        </div>
+                        <div class="field">
+                            <span>kategori</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>seviye</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>yas_grubu</span>
+                            <span class="field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="field">
+                            <span>toplam_ders_saati</span>
+                            <span class="field-type">INT</span>
+                        </div>
+                        <div class="field">
+                            <span>kurs_suresi_hafta</span>
+                            <span class="field-type">INT</span>
+                        </div>
+                        <div class="field fk">
+                            <span>sorumlu_egitmen_id</span>
+                            <span class="field-type">INT (FK)</span>
+                        </div>
+                        <div class="field">
+                            <span>maksimum_ogrenci</span>
+                            <span class="field-type">INT</span>
+                        </div>
+                        <div class="field">
+                            <span>durum</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kayıtlar Tablosu -->
+                <div class="table-box quaternary">
+                    <div class="table-header">
+                        📝 KAYITLAR
+                    </div>
+                    <div class="table-fields">
+                        <div class="field pk">
+                            <span>kayit_id</span>
+                            <span class="field-type">INT (PK)</span>
+                        </div>
+                        <div class="field fk">
+                            <span>ogrenci_id</span>
+                            <span class="field-type">INT (FK)</span>
+                        </div>
+                        <div class="field fk">
+                            <span>kurs_id</span>
+                            <span class="field-type">INT (FK)</span>
+                        </div>
+                        <div class="field">
+                            <span>kayit_tarihi</span>
+                            <span class="field-type">DATETIME</span>
+                        </div>
+                        <div class="field">
+                            <span>kayit_durumu</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>devam_durumu</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>kurs_tamamlama_durumu</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>final_notu</span>
+                            <span class="field-type">DECIMAL(4,2)</span>
+                        </div>
+                        <div class="field">
+                            <span>sertifika_hak_edildi</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Devam Tablosu -->
+                <div class="table-box quinary">
+                    <div class="table-header">
+                        📊 DEVAM
+                    </div>
+                    <div class="table-fields">
+                        <div class="field pk">
+                            <span>devam_id</span>
+                            <span class="field-type">INT (PK)</span>
+                        </div>
+                        <div class="field fk">
+                            <span>ogrenci_id</span>
+                            <span class="field-type">INT (FK)</span>
+                        </div>
+                        <div class="field fk">
+                            <span>kurs_id</span>
+                            <span class="field-type">INT (FK)</span>
+                        </div>
+                        <div class="field">
+                            <span>ders_tarihi</span>
+                            <span class="field-type">DATE</span>
+                        </div>
+                        <div class="field">
+                            <span>katilim_durumu</span>
+                            <span class="field-type">ENUM</span>
+                        </div>
+                        <div class="field">
+                            <span>aciklama</span>
+                            <span class="field-type">TEXT</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sertifikalar Tablosu -->
+                <div class="table-box primary">
+                    <div class="table-header">
+                        🏆 SERTİFİKALAR
+                    </div>
+                    <div class="table-fields">
+                        <div class="field pk">
+                            <span>sertifika_id</span>
+                            <span class="field-type">INT (PK)</span>
+                        </div>
+                        <div class="field fk">
+                            <span>ogrenci_id</span>
+                            <span class="field-type">INT (FK)</span>
+                        </div>
+                        <div class="field fk">
+                            <span>kurs_id</span>
+                            <span class="field-type">INT (FK)</span>
+                        </div>
+                        <div class="field">
+                            <span>sertifika_no</span>
+                            <span class="field-type">VARCHAR(50)</span>
+                        </div>
+                        <div class="field">
+                            <span>tamamlanma_tarihi</span>
+                            <span class="field-type">DATE</span>
+                        </div>
+                        <div class="field">
+                            <span>verilis_tarihi</span>
+                            <span class="field-type">DATETIME</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İlişkiler -->
+            <div class="relationships">
+                <h3>🔗 Tablo İlişkileri</h3>
+                
+                <div class="relationship">
+                    <span>EĞİTMENLER</span>
+                    <span class="arrow">→</span>
+                    <span>KURSLAR</span>
+                    <small>(1:N - Bir eğitmen birden fazla kurs verebilir)</small>
+                </div>
+                
+                <div class="relationship">
+                    <span>ÖĞRENCILER</span>
+                    <span class="arrow">→</span>
+                    <span>KAYITLAR</span>
+                    <span class="arrow">←</span>
+                    <span>KURSLAR</span>
+                    <small>(N:M - Çoka çok ilişki, bir öğrenci birden fazla kursa kayıt olabilir)</small>
+                </div>
+                
+                <div class="relationship">
+                    <span>KAYITLAR</span>
+                    <span class="arrow">→</span>
+                    <span>DEVAM</span>
+                    <small>(1:N - Her kayıt için birden fazla devam kaydı)</small>
+                </div>
+                
+                <div class="relationship">
+                    <span>KAYITLAR</span>
+                    <span class="arrow">→</span>
+                    <span>SERTİFİKALAR</span>
+                    <small>(1:1 - Her başarılı kayıt için bir sertifika)</small>
+                </div>
+            </div>
+
+            <!-- İstatistikler -->
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">Toplam Tablo</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Foreign Key İlişkisi</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">45+</div>
+                    <div class="stat-label">Toplam Alan</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Ana Modül</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
