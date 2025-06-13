@@ -199,6 +199,9 @@ FROM egitmenler
 WHERE durum = 'Aktif' AND maas > 0
 GROUP BY pozisyon;
 
+ALTER TABLE egitmenler ADD password VARCHAR(255) NOT NULL;
+-- şifre: "bilge123" (bcrypt hash)
+UPDATE egitmenler SET password = '$2y$10$z3Q5z8y9X1Y2Z3W4X5Y6Z7A8B9C0D1E2F3G4H5I6J7K8L9M0N1O2P' WHERE egitmen_id IN (1, 2, 3);
 
 
 
@@ -499,7 +502,7 @@ INSERT INTO kayitlar (
 (2, 1, 'Onaylandı', '2024-06-18 09:15:00', 'admin',
  5, 'Hiç bilgisayar kullanmamış, temel seviyeden başlaması gerekiyor', 'Uygun',
  '2024-07-01', 'Düzenli', 0, 92.75,
- 'Başarıyla Tamamladı', 94.50, 'Evet',
+ 'Başarıyla Tamamladı', 94.50, 'Evet',kurslar
  0.00, 'Muaf', 5,
  'Harika bir deneyimdi, eğitmenimiz çok sabırlıydı', 'Çok çalışkan ve başarılı, rol model olabilir', 'admin'),
 
@@ -639,3 +642,480 @@ CREATE TABLE sertifikalar (
 INSERT INTO sertifikalar (ogrenci_id, kurs_id, sertifika_no, tamamlanma_tarihi, sertifika_onaylayan_admin) VALUES
 (1, 1, 'TRKTM-BK001-AHMAD-001', '2024-09-09', 'admin'),
 (2, 1, 'TRKTM-BK001-FATIMA-002', '2024-09-09', 'admin');
+ALTER TABLE kurslar MODIFY COLUMN kurs_suresi_hafta INT NULL;
+
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE sp_OgrencilerHepsi ()
+BEGIN
+    SELECT 
+        ogrenci_id AS ID,
+        CONCAT(ad, ' ', soyad) AS AdiSoyadi,
+        yas AS Yas,
+        cinsiyet AS Cinsiyet,
+        telefon AS Telefon,
+        sehir AS Sehir
+    FROM ogrenciler
+    WHERE durum = 'Aktif';
+END //
+
+CREATE PROCEDURE sp_OgrenciEkle (
+    IN p_ad VARCHAR(50),
+    IN p_soyad VARCHAR(50),
+    IN p_yas INT,
+    IN p_cinsiyet ENUM('Erkek', 'Kız'),
+    IN p_telefon VARCHAR(20),
+    IN p_sehir VARCHAR(50),
+    IN p_olusturan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        INSERT INTO ogrenciler (ad, soyad, yas, cinsiyet, telefon, sehir, olusturan_admin)
+        VALUES (p_ad, p_soyad, p_yas, p_cinsiyet, p_telefon, p_sehir, p_olusturan_admin);
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_OgrenciGuncelle (
+    IN p_ogrenci_id INT,
+    IN p_ad VARCHAR(50),
+    IN p_soyad VARCHAR(50),
+    IN p_yas INT,
+    IN p_cinsiyet ENUM('Erkek', 'Kız'),
+    IN p_telefon VARCHAR(20),
+    IN p_sehir VARCHAR(50),
+    IN p_olusturan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        UPDATE ogrenciler 
+        SET ad = p_ad, soyad = p_soyad, yas = p_yas, cinsiyet = p_cinsiyet, 
+            telefon = p_telefon, sehir = p_sehir, olusturan_admin = p_olusturan_admin
+        WHERE ogrenci_id = p_ogrenci_id;
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_OgrenciSil (
+    IN p_ogrenci_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        DELETE FROM ogrenciler WHERE ogrenci_id = p_ogrenci_id;
+    COMMIT;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE sp_EgitmenlerHepsi ()
+BEGIN
+    SELECT 
+        egitmen_id AS ID,
+        CONCAT(ad, ' ', soyad) AS AdiSoyadi,
+        telefon AS Telefon,
+        email AS Email,
+        pozisyon AS Pozisyon
+    FROM egitmenler
+    WHERE durum = 'Aktif';
+END //
+
+CREATE PROCEDURE sp_EgitmenEkle (
+    IN p_ad VARCHAR(50),
+    IN p_soyad VARCHAR(50),
+    IN p_telefon VARCHAR(20),
+    IN p_email VARCHAR(100),
+    IN p_pozisyon ENUM('Gönüllü', 'Yarı Zamanlı', 'Tam Zamanlı'),
+    IN p_olusturan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        INSERT INTO egitmenler (ad, soyad, telefon, email, pozisyon, olusturan_admin)
+        VALUES (p_ad, p_soyad, p_telefon, p_email, p_pozisyon, p_olusturan_admin);
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_EgitmenGuncelle (
+    IN p_egitmen_id INT,
+    IN p_ad VARCHAR(50),
+    IN p_soyad VARCHAR(50),
+    IN p_telefon VARCHAR(20),
+    IN p_email VARCHAR(100),
+    IN p_pozisyon ENUM('Gönüllü', 'Yarı Zamanlı', 'Tam Zamanlı'),
+    IN p_olusturan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        UPDATE egitmenler 
+        SET ad = p_ad, soyad = p_soyad, telefon = p_telefon, email = p_email, 
+            pozisyon = p_pozisyon, olusturan_admin = p_olusturan_admin
+        WHERE egitmen_id = p_egitmen_id;
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_EgitmenSil (
+    IN p_egitmen_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        DELETE FROM egitmenler WHERE egitmen_id = p_egitmen_id;
+    COMMIT;
+END //
+DELIMITER ;
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE sp_KurslarHepsi ()
+BEGIN
+    SELECT 
+        kurs_id AS ID,
+        kurs_adi AS KursAdi,
+        kategori AS Kategori,
+        seviye AS Seviye,
+        durum AS Durum
+    FROM kurslar;
+END //
+
+CREATE PROCEDURE sp_KursEkle (
+    IN p_kurs_adi VARCHAR(100),
+    IN p_kurs_kodu VARCHAR(20),
+    IN p_kategori ENUM('Temel Bilgisayar', 'Yazılım Geliştirme', 'Yapay Zeka', 'Siber Güvenlik'),
+    IN p_seviye ENUM('Başlangıç', 'Orta', 'İleri'),
+    IN p_toplam_ders_saati INT,
+    IN p_olusturan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        INSERT INTO kurslar (kurs_adi, kurs_kodu, kategori, seviye, toplam_ders_saati, olusturan_admin)
+        VALUES (p_kurs_adi, p_kurs_kodu, p_kategori, p_seviye, p_toplam_ders_saati, p_olusturan_admin);
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_KursGuncelle (
+    IN p_kurs_id INT,
+    IN p_kurs_adi VARCHAR(100),
+    IN p_kurs_kodu VARCHAR(20),
+    IN p_kategori ENUM('Temel Bilgisayar', 'Yazılım Geliştirme', 'Yapay Zeka', 'Siber Güvenlik'),
+    IN p_seviye ENUM('Başlangıç', 'Orta', 'İleri'),
+    IN p_toplam_ders_saati INT,
+    IN p_olusturan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        UPDATE kurslar 
+        SET kurs_adi = p_kurs_adi, kurs_kodu = p_kurs_kodu, kategori = p_kategori, 
+            seviye = p_seviye, toplam_ders_saati = p_toplam_ders_saati, olusturan_admin = p_olusturan_admin
+        WHERE kurs_id = p_kurs_id;
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_KursSil (
+    IN p_kurs_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        DELETE FROM kurslar WHERE kurs_id = p_kurs_id;
+    COMMIT;
+END //
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE sp_KayitlarHepsi ()
+BEGIN
+    SELECT 
+        kayit_id AS ID,
+        CONCAT(o.ad, ' ', o.soyad) AS OgrenciAdi,
+        k.kurs_adi AS KursAdi,
+        kayit_durumu AS KayitDurumu
+    FROM kayitlar k
+    JOIN ogrenciler o ON k.ogrenci_id = o.ogrenci_id
+    JOIN kurslar k2 ON k.kurs_id = k2.kurs_id;
+END //
+
+CREATE PROCEDURE sp_KayitEkle (
+    IN p_ogrenci_id INT,
+    IN p_kurs_id INT,
+    IN p_kayit_durumu ENUM('Beklemede', 'Onaylandı', 'Reddedildi', 'İptal'),
+    IN p_onaylayan_admin VARCHAR(50),
+    IN p_kayit_yapan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        INSERT INTO kayitlar (ogrenci_id, kurs_id, kayit_durumu, onaylayan_admin, kayit_yapan_admin)
+        VALUES (p_ogrenci_id, p_kurs_id, p_kayit_durumu, p_onaylayan_admin, p_kayit_yapan_admin);
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_KayitGuncelle (
+    IN p_kayit_id INT,
+    IN p_kayit_durumu ENUM('Beklemede', 'Onaylandı', 'Reddedildi', 'İptal'),
+    IN p_onaylayan_admin VARCHAR(50),
+    IN p_kayit_yapan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        UPDATE kayitlar 
+        SET kayit_durumu = p_kayit_durumu, onaylayan_admin = p_onaylayan_admin, kayit_yapan_admin = p_kayit_yapan_admin
+        WHERE kayit_id = p_kayit_id;
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_KayitSil (
+    IN p_kayit_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        DELETE FROM kayitlar WHERE kayit_id = p_kayit_id;
+    COMMIT;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE sp_DevamHepsi()
+BEGIN
+    SELECT 
+        devam_id AS ID,
+        CONCAT(o.ad, ' ', o.soyad) AS OgrenciAdi,
+        k.kurs_adi AS KursAdi,
+        ders_tarihi AS DersTarihi,
+        katilim_durumu AS KatilimDurumu
+    FROM devam d
+    JOIN ogrenciler o ON d.ogrenci_id = o.ogrenci_id
+    JOIN kurslar k ON d.kurs_id = k.kurs_id;
+END //
+
+CREATE PROCEDURE sp_DevamEkle (
+    IN p_ogrenci_id INT,
+    IN p_kurs_id INT,
+    IN p_ders_tarihi DATE,
+    IN p_katilim_durumu ENUM('Katıldı', 'Gelmedi', 'Geç Geldi', 'İzinli'),
+    IN p_kayit_yapan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        INSERT INTO devam (ogrenci_id, kurs_id, ders_tarihi, katilim_durumu, kayit_yapan_admin)
+        VALUES (p_ogrenci_id, p_kurs_id, p_ders_tarihi, p_katilim_durumu, p_kayit_yapan_admin);
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_DevamGuncelle (
+    IN p_devam_id INT,
+    IN p_katilim_durumu ENUM('Katıldı', 'Gelmedi', 'Geç Geldi', 'İzinli'),
+    IN p_kayit_yapan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        UPDATE devam 
+        SET katilim_durumu = p_katilim_durumu, kayit_yapan_admin = p_kayit_yapan_admin
+        WHERE devam_id = p_devam_id;
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_DevamSil (
+    IN p_devam_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        DELETE FROM devam WHERE devam_id = p_devam_id;
+    COMMIT;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE sp_SertifikalarHepsi ()
+BEGIN
+    SELECT 
+        sertifika_id AS ID,
+        CONCAT(o.ad, ' ', o.soyad) AS OgrenciAdi,
+        k.kurs_adi AS KursAdi,
+        sertifika_no AS SertifikaNo,
+        verilis_tarihi AS VerilisTarihi
+    FROM sertifikalar s
+    JOIN ogrenciler o ON s.ogrenci_id = o.ogrenci_id
+    JOIN kurslar k ON s.kurs_id = k.kurs_id;
+END //
+
+CREATE PROCEDURE sp_SertifikaEkle (
+    IN p_ogrenci_id INT,
+    IN p_kurs_id INT,
+    IN p_sertifika_no VARCHAR(50),
+    IN p_tamamlama_tarihi DATE,
+    IN p_sertifika_onaylayan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        INSERT INTO sertifikalar (ogrenci_id, kurs_id, sertifika_no, tamamlanma_tarihi, sertifika_onaylayan_admin)
+        VALUES (p_ogrenci_id, p_kurs_id, p_sertifika_no, p_tamamlama_tarihi, p_sertifika_onaylayan_admin);
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_SertifikaGuncelle (
+    IN p_sertifika_id INT,
+    IN p_sertifika_no VARCHAR(50),
+    IN p_tamamlama_tarihi DATE,
+    IN p_sertifika_onaylayan_admin VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        UPDATE sertifikalar 
+        SET sertifika_no = p_sertifika_no, tamamlanma_tarihi = p_tamamlama_tarihi, 
+            sertifika_onaylayan_admin = p_sertifika_onaylayan_admin
+        WHERE sertifika_id = p_sertifika_id;
+    COMMIT;
+END //
+
+CREATE PROCEDURE sp_SertifikaSil (
+    IN p_sertifika_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+        DELETE FROM sertifikalar WHERE sertifika_id = p_sertifika_id;
+    COMMIT;
+END //
+DELIMITER ; 
+Trigger
+
+-- Trigger 1: Güncelleme Takibi
+-- Her tablo güncellemesinde bir log kaydı oluşturur.
+
+DELIMITER //
+CREATE TABLE log_kayitlari (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    tablo_adi VARCHAR(50),
+    kayit_id INT,
+    islem_tarihi DATETIME DEFAULT CURRENT_TIMESTAMP,
+    yapan_admin VARCHAR(50)
+);
+
+CREATE TRIGGER trg_GuncellemeTakip
+AFTER UPDATE ON ogrenciler
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_kayitlari (tablo_adi, kayit_id, yapan_admin)
+    VALUES ('ogrenciler', NEW.ogrenci_id, NEW.olusturan_admin);
+END //
+DELIMITER ;
+
+
+
+-- Trigger 2: Durum Değişim Kontrolü
+-- Öğrenci "Ayrılmış" olursa, kayıtları etkiler
+
+DELIMITER //
+CREATE TRIGGER trg_DurumKontrol
+BEFORE UPDATE ON ogrenciler
+FOR EACH ROW
+BEGIN
+    IF NEW.durum = 'Ayrılmış' AND OLD.durum != 'Ayrılmış' THEN
+        UPDATE kayitlar 
+        SET kurs_tamamlama_durumu = 'Yarıda Bıraktı'
+        WHERE ogrenci_id = NEW.ogrenci_id AND kurs_tamamlama_durumu = 'Devam Ediyor';
+    END IF;
+END //
+DELIMITER ;
