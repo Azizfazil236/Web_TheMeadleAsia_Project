@@ -3,7 +3,8 @@
 
 $host = 'localhost';          
 $dbname = 'teknoloji_merkezi'; 
-$user = 'root';               
+$user = 'root'; 
+//misal olarak remzi aşağıdaki gibi tayin edebiliriz gibi :)
 $pass = 'fazil236';                  
 try {
     $db = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
