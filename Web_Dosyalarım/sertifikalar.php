@@ -1,10 +1,10 @@
 <?php
 session_start();
 
-require 'db.php'; // Veritabanı bağlantısı $db değişkeninde olmalı
+require 'db.php'; 
 
 if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "admin") {
-    header("Location: login.php"); // Admin değilse giriş sayfasına yönlendir
+    header("Location: login.php");
     exit;
 }
 
@@ -182,18 +182,18 @@ try {
         .form-section input[type="email"],
         .form-section input[type="date"],
         .form-section select {
-            width: calc(100% - 24px); /* Padding'i hesaba kat */
+            width: calc(100% - 24px); 
             padding: 12px;
             margin-bottom: 15px;
             border: 1px solid #ced4da;
             border-radius: 8px;
             font-size: 16px;
-            box-sizing: border-box; /* Padding'i genişliğe dahil et */
+            box-sizing: border-box; 
         }
         .form-section input[type="submit"] {
-            width: auto; /* Otomatik genişlik */
+            width: auto; 
             padding: 12px 25px;
-            background: linear-gradient(90deg, #28a745, #218838); /* Yeşil buton */
+            background: linear-gradient(90deg, #28a745, #218838); /
             color: white;
             border: none;
             border-radius: 8px;
