@@ -1,20 +1,16 @@
 <?php
-session_start(); // Oturumu başlat
+session_start();
 
-// db.php dosyasını dahil et
 require 'db.php'; // Veritabanı bağlantısı $db değişkeninde olmalı
 
-// Kullanıcı girişi kontrolü: Sadece adminler erişebilir
 if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "admin") {
     header("Location: login.php"); // Admin değilse giriş sayfasına yönlendir
     exit;
 }
 
-$error_message = "";    // Hata mesajları için değişken
-$success_message = "";  // Başarı mesajları için değişken
+$error_message = "";   
+$success_message = "";  
 
-// --- Veri Çekme Fonksiyonları ---
-// Öğrencileri ve kursları dropdown'lar için çekiyoruz
 function getStudents($db) {
     try {
         $stmt = $db->query("SELECT ogrenci_id, ad, soyad FROM ogrenciler ORDER BY ad, soyad");
@@ -38,9 +34,8 @@ function getCourses($db) {
 $ogrenciler = getStudents($db);
 $kurslar = getCourses($db);
 
-// --- CRUD İşlemleri ---
 
-// Ekleme işlemi
+
 if (isset($_POST['ekle'])) {
     $ogrenci_id = $_POST['ogrenci_id'];
     $kurs_id = $_POST['kurs_id'];
@@ -51,7 +46,6 @@ if (isset($_POST['ekle'])) {
         $error_message = "Lütfen tüm zorunlu alanları doldurun.";
     } else {
         try {
-            // Sertifika numarasının benzersizliğini kontrol et
             $stmt_check = $db->prepare("SELECT COUNT(*) FROM sertifikalar WHERE sertifika_no = ?");
             $stmt_check->execute([$sertifika_no]);
             if ($stmt_check->fetchColumn() > 0) {
@@ -69,7 +63,6 @@ if (isset($_POST['ekle'])) {
     }
 }
 
-// Silme işlemi
 if (isset($_GET['sil'])) {
     $id = $_GET['sil'];
     try {
@@ -83,7 +76,6 @@ if (isset($_GET['sil'])) {
     }
 }
 
-// Güncelleme verisi çekme (formu doldurmak için)
 $guncelle = null;
 if (isset($_GET['duzenle'])) {
     $id = $_GET['duzenle'];
@@ -99,7 +91,6 @@ if (isset($_GET['duzenle'])) {
     }
 }
 
-// Güncelleme işlemi
 if (isset($_POST['guncelle'])) {
     $id = $_POST['id'];
     $ogrenci_id = $_POST['ogrenci_id'];
@@ -111,7 +102,6 @@ if (isset($_POST['guncelle'])) {
         $error_message = "Lütfen tüm zorunlu alanları doldurun.";
     } else {
         try {
-            // Güncellenen sertifika numarasının başka bir kayıtta kullanılıp kullanılmadığını kontrol et
             $stmt_check = $db->prepare("SELECT COUNT(*) FROM sertifikalar WHERE sertifika_no = ? AND sertifika_id != ?");
             $stmt_check->execute([$sertifika_no, $id]);
             if ($stmt_check->fetchColumn() > 0) {
@@ -129,15 +119,12 @@ if (isset($_POST['guncelle'])) {
     }
 }
 
-// Mesajları GET parametresinden al (Yenileme sonrası mesajların görünmesi için)
 if (isset($_GET['success'])) {
     $success_message = htmlspecialchars($_GET['success']);
 }
 if (isset($_GET['error'])) {
     $error_message = htmlspecialchars($_GET['error']);
 }
-
-// Listeleme (Her zaman çalışır)
 try {
     $sertifikalar = $db->query("
         SELECT s.sertifika_id, s.tamamlanma_tarihi, s.sertifika_no,
@@ -150,7 +137,7 @@ try {
     ")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error_message = (isset($error_message) && !empty($error_message)) ? $error_message : "Sertifika listesi çekilirken bir hata oluştu: " . $e->getMessage();
-    $sertifikalar = []; // Hata durumunda boş liste
+    $sertifikalar = [];
 }
 
 ?>
@@ -162,7 +149,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sertifika Yönetimi - Bilge Nesil</title>
     <style>
-        /* CSS stilleri diğer yönetim sayfalarınızdaki ile tamamen uyumlu */
+    
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; background: #f0f4f8; color: #1a3c5e; }
         .container { max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         h2, h3 { color: #007bff; text-align: center; margin-bottom: 25px; }
