@@ -1,5 +1,5 @@
 <?php
-include 'db.php'; // db.php PDO bağlantınızı içeriyor
+include 'db.php'; 
 
 
 $error = "";
@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Lütfen tüm zorunlu alanları doldurun.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = "Geçerli bir e-posta adresi girin.";
-    } elseif (strlen($password) < 6) { // Şifre uzunluğu kontrolü
+    } elseif (strlen($password) < 6) { 
         $error = "Şifreniz en az 6 karakter olmalıdır.";
     } else {
         try {
