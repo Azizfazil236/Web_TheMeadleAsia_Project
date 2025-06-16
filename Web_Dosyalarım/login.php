@@ -53,13 +53,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             max-width: 600px;
-            width: 90%; /* Responsive width */
-            box-sizing: border-box; /* Include padding in width */
+            width: 90%; 
+            box-sizing: border-box;
         }
         h1 {
             font-size: 30px;
             margin-bottom: 0px;
-            color: #007bff; /* Added color for distinction */
+            color: #007bff;
         }
         p {
             font-size: 14px;
@@ -74,8 +74,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             text-decoration: none;
             font-size: 16px;
             cursor: pointer;
-            display: inline-block; /* For proper button styling */
-            margin-top: 15px; /* Spacing */
+            display: inline-block; 
+            margin-top: 15px; 
         }
         .btn:hover {
             background: linear-gradient(90deg, #0056b3, #003d80);
@@ -88,12 +88,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin-top: 0px;
             text-align: left;
         }
-        .login-form h2 { /* Added specific styling for h2 in login-form */
+        .login-form h2 {
             color: #1a3c5e;
             margin-bottom: 20px;
         }
         .login-form input {
-            width: calc(100% - 24px); /* Account for padding */
+            width: calc(100% - 24px); 
             padding: 12px;
             margin: 8px 0;
             border: 1px solid #ccc;
@@ -110,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-size: 16px;
             margin-top: 10px;
             cursor: pointer;
-            transition: background 0.3s ease; /* Smooth hover effect */
+            transition: background 0.3s ease;
         }
         .login-form button:hover {
             background: linear-gradient(90deg, #0056b3, #003d80);
@@ -130,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #007bff;
             text-decoration: none;
             font-size: 14px;
-            margin: 0 10px; /* Spacing between links */
+            margin: 0 10px; 
         }
         .links a:hover {
             text-decoration: underline;
