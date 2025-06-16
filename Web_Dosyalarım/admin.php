@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db.php'; // Veritabanı bağlantısı için
+require 'db.php';
 
 if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "admin") {
     header("Location: login.php");
@@ -10,7 +10,7 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "admin") {
 $admin_adi = $_SESSION["username"] ?? "Admin";
 $error_message = "";
 
-// Veritabanı sorgularını tek bir try-catch bloğunda toplayalım
+
 try {
     $data_sections = [
         "ogrenciler" => [
@@ -83,7 +83,7 @@ try {
         "sertifikalar" => [
             "title" => "Sertifikalar",
             "icon" => "📄",
-            // SERTİFİKA sorgusunu 'tamamlanma_tarihi' ile güncelledik
+         
             "query" => "SELECT s.sertifika_id, s.sertifika_no, s.tamamlanma_tarihi, CONCAT(o.ad, ' ', o.soyad) AS ogrenci_adi, k.kurs_adi FROM sertifikalar s JOIN ogrenciler o ON s.ogrenci_id = o.ogrenci_id JOIN kurslar k ON s.kurs_id = k.kurs_id ORDER BY s.tamamlanma_tarihi DESC LIMIT 5",
             "headers" => ["Sertifika ID", "Öğrenci", "Kurs", "Sertifika No", "Tamamlanma Tarihi"], // Header'ı da güncelledik
             "map_func" => fn($row) => [
