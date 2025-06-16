@@ -1,10 +1,8 @@
 <?php
 session_start(); // Oturumu başlat
 
-// db.php dosyasını dahil et (veritabanı bağlantısı için)
 require 'db.php';
 
-// Kullanıcı girişi kontrolü: Sadece adminler erişebilir
 if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "admin") {
     header("Location: login.php"); // Admin değilse giriş sayfasına yönlendir
     exit;
@@ -13,7 +11,6 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "admin") {
 $error_message = ""; // Hata mesajları için değişken
 $success_message = ""; // Başarı mesajları için değişken
 
-// Güncelleme için veri çekme (formu doldurmak için)
 $guncelle = null;
 if (isset($_GET['duzenle'])) {
     $id = $_GET['duzenle'];
@@ -30,14 +27,12 @@ if (isset($_GET['duzenle'])) {
 }
 
 
-// Ekleme işlemi
 if (isset($_POST['ekle'])) {
     $ogrenci_id = $_POST['ogrenci_id'];
     $kurs_id = $_POST['kurs_id'];
     $tarih = $_POST['tarih'];
     $katilim_durumu = $_POST['katilim_durumu'];
 
-    // Basit doğrulama
     if (empty($ogrenci_id) || empty($kurs_id) || empty($tarih) || empty($katilim_durumu)) {
         $error_message = "Lütfen tüm zorunlu alanları doldurun.";
     } else {
@@ -53,7 +48,6 @@ if (isset($_POST['ekle'])) {
     }
 }
 
-// Silme işlemi
 if (isset($_GET['sil'])) {
     $id = $_GET['sil'];
     try {
@@ -67,7 +61,6 @@ if (isset($_GET['sil'])) {
     }
 }
 
-// Güncelleme işlemi
 if (isset($_POST['guncelle'])) {
     $id = $_POST['id'];
     $ogrenci_id = $_POST['ogrenci_id'];
@@ -75,7 +68,6 @@ if (isset($_POST['guncelle'])) {
     $tarih = $_POST['tarih'];
     $katilim_durumu = $_POST['katilim_durumu'];
 
-    // Basit doğrulama
     if (empty($id) || empty($ogrenci_id) || empty($kurs_id) || empty($tarih) || empty($katilim_durumu)) {
         $error_message = "Lütfen tüm zorunlu alanları doldurun.";
     } else {
@@ -83,15 +75,12 @@ if (isset($_POST['guncelle'])) {
             $stmt = $db->prepare("UPDATE devam SET ogrenci_id=?, kurs_id=?, tarih=?, katilim_durumu=? WHERE devam_id=?");
             $stmt->execute([$ogrenci_id, $kurs_id, $tarih, $katilim_durumu, $id]);
             $success_message = "Devam kaydı başarıyla güncellendi!";
-            //header("Location: devam.php"); // Mesajı göstermek için yönlendirmeyi kaldır
-            //exit;
         } catch (PDOException $e) {
             $error_message = "Devam kaydı güncellenirken bir hata oluştu: " . $e->getMessage();
         }
     }
 }
 
-// Listeleme (Her zaman çalışır)
 try {
     $devamlar = $db->query("
         SELECT d.devam_id, d.tarih, d.katilim_durumu,
@@ -107,7 +96,6 @@ try {
     $devamlar = []; // Hata durumunda boş liste
 }
 
-// Öğrenciler ve kurslar listeleri (formlar için)
 try {
     $ogrenciler = $db->query("SELECT ogrenci_id, CONCAT(ad, ' ', soyad) AS adsoyad FROM ogrenciler ORDER BY adsoyad ASC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
