@@ -1,20 +1,18 @@
 <?php
-// session_start(); // Kayıt sayfasında session'a gerek yok, hatta olmaması daha iyi
 include 'db.php'; // db.php PDO bağlantınızı içeriyor
 
-// Hata mesajı için bir değişken tanımlayalım
+
 $error = "";
 $success_message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $ad = trim($_POST["ad"]); // Boşlukları temizle
-    $soyad = trim($_POST["soyad"]); // Boşlukları temizle
-    $email = trim($_POST["email"]); // Boşlukları temizle
+    $ad = trim($_POST["ad"]); 
+    $soyad = trim($_POST["soyad"]); 
+    $email = trim($_POST["email"]); 
     $password = $_POST["password"];
-    $telefon = trim($_POST["telefon"]); // Boşlukları temizle
-    $olusturan_admin = "self"; // Bu kayıt sayfasından yapıldığı için 'self'
-
-    // Basit bir doğrulama ekleyelim
+    $telefon = trim($_POST["telefon"]); 
+    $olusturan_admin = "self";
+    
     if (empty($ad) || empty($soyad) || empty($email) || empty($password)) {
         $error = "Lütfen tüm zorunlu alanları doldurun.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -22,22 +20,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (strlen($password) < 6) { // Şifre uzunluğu kontrolü
         $error = "Şifreniz en az 6 karakter olmalıdır.";
     } else {
-        // E-posta zaten var mı kontrolü
         try {
             $check_email_query = $db->prepare("SELECT COUNT(*) FROM egitmenler WHERE email = ?");
             $check_email_query->execute([$email]);
             if ($check_email_query->fetchColumn() > 0) {
                 $error = "Bu e-posta adresi zaten kullanımda.";
             } else {
-                // Şifreyi güvenli bir şekilde hash'le
                 $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
                 try {
                     $sorgu = $db->prepare("INSERT INTO egitmenler (ad, soyad, email, password, telefon, olusturan_admin, baslama_tarihi, pozisyon) VALUES (?, ?, ?, ?, ?, ?, CURDATE(), 'Gönüllü')");
                     $sorgu->execute([$ad, $soyad, $email, $hashed_password, $telefon, $olusturan_admin]);
                     $success_message = "Kayıt başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.";
-                    // header("Location: login.php"); // Başarılı mesajı göstermek için yönlendirmeyi kaldırıyoruz
-                    // exit;
                 } catch (PDOException $e) {
                     $error = "Kayıt işlemi sırasında bir veritabanı hatası oluştu: " . $e->getMessage();
                 }
@@ -71,14 +65,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .container {
             max-width: 450px;
             background: rgba(255, 255, 255, 0.95);
-            padding: 30px; /* Padding artırdık */
+            padding: 30px; 
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            width: 90%; /* Responsive width */
+            width: 90%;
             box-sizing: border-box;
         }
         h2 {
-            font-size: 28px; /* Başlık boyutunu büyüttük */
+            font-size: 28px; 
             margin-bottom: 0px;
             color: #007bff;
         }
@@ -87,28 +81,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         label {
             display: block;
-            margin: 12px 0 6px; /* Boşlukları düzenledik */
+            margin: 12px 0 6px; 
             color: #1a3c5e;
-            font-weight: bold; /* Label'ları kalın yaptık */
+            font-weight: bold; 
             font-size: 15px;
         }
         input {
-            width: calc(100% - 24px); /* Padding'i hesaba kat */
-            padding: 12px; /* Input padding'ini artırdık */
-            margin-bottom: 15px; /* Alt boşluk ekledik */
+            width: calc(100% - 24px); 
+            padding: 12px; 
+            margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 16px;
         }
         button {
             width: 100%;
-            padding: 14px; /* Buton padding'ini artırdık */
+            padding: 14px; 
             background: linear-gradient(90deg, #007bff, #0056b3);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 17px; /* Buton font boyutunu büyüttük */
-            margin-top: 20px; /* Üst boşluk ekledik */
+            font-size: 17px; 
+            margin-top: 20px;
             cursor: pointer;
             transition: background 0.3s ease;
         }
