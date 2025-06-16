@@ -1,19 +1,16 @@
 <?php
-session_start(); // Oturumu başlat
+session_start();
 
-// db.php dosyasını dahil et (veritabanı bağlantısı için)
 require 'db.php';
 
-// Kullanıcı girişi kontrolü: Sadece adminler erişebilir
 if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "admin") {
-    header("Location: login.php"); // Admin değilse giriş sayfasına yönlendir
+    header("Location: login.php");
     exit;
 }
 
-$error_message = ""; // Hata mesajları için değişken
-$success_message = ""; // Başarı mesajları için değişken
+$error_message = ""; 
+$success_message = "";
 
-// Ekleme işlemi
 if (isset($_POST['ekle'])) {
     $ad = trim($_POST['ad']);
     $soyad = trim($_POST['soyad']);
@@ -21,40 +18,38 @@ if (isset($_POST['ekle'])) {
     $cinsiyet = $_POST['cinsiyet'];
     $telefon = trim($_POST['telefon']);
 
-    // Basit doğrulama
+  
     if (empty($ad) || empty($soyad) || empty($yas) || empty($cinsiyet)) {
         $error_message = "Lütfen tüm zorunlu alanları doldurun.";
     } elseif (!is_numeric($yas) || $yas <= 0) {
         $error_message = "Yaş geçerli bir sayı olmalıdır.";
     } else {
         try {
-            // Sadece formda olan alanlar ekleniyor
             $stmt = $db->prepare("INSERT INTO ogrenciler (ad, soyad, yas, cinsiyet, telefon, durum, kayit_tarihi) VALUES (?, ?, ?, ?, ?, 'Aktif', CURDATE())");
             $stmt->execute([$ad, $soyad, $yas, $cinsiyet, $telefon]);
             $success_message = "Öğrenci başarıyla eklendi!";
-            // header("Location: ogrenciler.php"); // Mesajı göstermek için yönlendirmeyi kaldır
-            // exit;
+
+          
         } catch (PDOException $e) {
             $error_message = "Öğrenci eklenirken bir hata oluştu: " . $e->getMessage();
         }
     }
 }
 
-// Silme işlemi
+
 if (isset($_GET['sil'])) {
     $id = $_GET['sil'];
     try {
         $stmt = $db->prepare("DELETE FROM ogrenciler WHERE ogrenci_id = ?");
         $stmt->execute([$id]);
         $success_message = "Öğrenci başarıyla silindi!";
-        header("Location: ogrenciler.php"); // Silme sonrası sayfayı yenile
+        header("Location: ogrenciler.php"); 
         exit;
     } catch (PDOException $e) {
         $error_message = "Öğrenci silinirken bir hata oluştu: " . $e->getMessage();
     }
 }
 
-// Güncelleme verisi çekme (formu doldurmak için)
 $guncelle = null;
 if (isset($_GET['duzenle'])) {
     $id = $_GET['duzenle'];
@@ -70,7 +65,7 @@ if (isset($_GET['duzenle'])) {
     }
 }
 
-// Güncelleme işlemi
+
 if (isset($_POST['guncelle'])) {
     $id = $_POST['id'];
     $ad = trim($_POST['ad']);
@@ -78,9 +73,9 @@ if (isset($_POST['guncelle'])) {
     $yas = $_POST['yas'];
     $cinsiyet = $_POST['cinsiyet'];
     $telefon = trim($_POST['telefon']);
-    $durum = $_POST['durum']; // Durumu da güncelleyebilmek için ekledik
+    $durum = $_POST['durum']; 
 
-    // Basit doğrulama
+  
     if (empty($ad) || empty($soyad) || empty($yas) || empty($cinsiyet) || empty($id)) {
         $error_message = "Lütfen tüm zorunlu alanları doldurun.";
     } elseif (!is_numeric($yas) || $yas <= 0) {
@@ -148,18 +143,18 @@ try {
         .form-section input[type="text"],
         .form-section input[type="number"],
         .form-section select {
-            width: calc(100% - 24px); /* Padding'i hesaba kat */
+            width: calc(100% - 24px); 
             padding: 12px;
             margin-bottom: 15px;
             border: 1px solid #ced4da;
             border-radius: 8px;
             font-size: 16px;
-            box-sizing: border-box; /* Padding'i genişliğe dahil et */
+            box-sizing: border-box; 
         }
         .form-section input[type="submit"] {
-            width: auto; /* Otomatik genişlik */
+            width: auto;
             padding: 12px 25px;
-            background: linear-gradient(90deg, #28a745, #218838); /* Yeşil buton */
+            background: linear-gradient(90deg, #28a745, #218838); 
             color: white;
             border: none;
             border-radius: 8px;
