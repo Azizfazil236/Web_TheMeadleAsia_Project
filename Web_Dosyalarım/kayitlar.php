@@ -1,26 +1,21 @@
 <?php
-session_start(); // Oturumu başlat
+session_start(); 
 
-// db.php dosyasını dahil et
 require 'db.php';
 
-// Kullanıcı girişi kontrolü: Sadece adminler erişebilir
 if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "admin") {
-    header("Location: login.php"); // Admin değilse giriş sayfasına yönlendir
+    header("Location: login.php");
     exit;
 }
 
-$error_message = ""; // Hata mesajları için değişken
-$success_message = ""; // Başarı mesajları için değişken
+$error_message = ""; 
+$success_message = ""; 
 
-// --- Veri Çekme Fonksiyonları ---
-// Öğrencileri ve kursları dropdown'lar için çekiyoruz
 function getStudents($db) {
     try {
         $stmt = $db->query("SELECT ogrenci_id, ad, soyad FROM ogrenciler ORDER BY ad, soyad");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        // Hata durumunda loglama yapabiliriz
+    } catch (PDOException $e) 
         error_log("Öğrenciler çekilirken hata: " . $e->getMessage());
         return [];
     }
@@ -39,12 +34,10 @@ function getCourses($db) {
 $ogrenciler = getStudents($db);
 $kurslar = getCourses($db);
 
-// Kayıt Durumları (ENUM'dan alınabilir veya manuel tanımlanabilir)
 $kayit_durumlari = ['Beklemede', 'Onaylandı', 'Reddedildi', 'Tamamlandı'];
 
-// --- CRUD İşlemleri ---
 
-// Ekleme işlemi
+
 if (isset($_POST['ekle'])) {
     $ogrenci_id = $_POST['ogrenci_id'];
     $kurs_id = $_POST['kurs_id'];
