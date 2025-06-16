@@ -1,30 +1,25 @@
 <?php
-session_start(); // Oturumu başlat
+session_start(); 
 
-// db.php dosyasını dahil et (veritabanı bağlantısı için)
 require 'db.php';
-
-// Kullanıcı girişi kontrolü: Sadece adminler erişebilir
 if (!isset($_SESSION["user_id"]) || $_SESSION["role"] != "admin") {
-    header("Location: login.php"); // Admin değilse giriş sayfasına yönlendir
+    header("Location: login.php");
     exit;
 }
 
-$error_message = ""; // Hata mesajları için değişken
-$success_message = ""; // Başarı mesajları için değişken
+$error_message = ""; 
+$success_message = ""; 
 
-// Ekleme işlemi
 if (isset($_POST['ekle'])) {
     $ad = trim($_POST['ad']);
     $soyad = trim($_POST['soyad']);
     $telefon = trim($_POST['telefon']);
     $email = trim($_POST['email']);
     $uzmanlik_alani_1 = $_POST['uzmanlik_alani_1'];
-    // $uzmanlik_alani_2 = $_POST['uzmanlik_alani_2']; // Formda yok, bu yüzden kaldırıldı
     $pozisyon = $_POST['pozisyon'];
     $baslama_tarihi = $_POST['baslama_tarihi'];
     $cinsiyet = $_POST['cinsiyet'];
-    $password = $_POST['password'] ?? ''; // password alanı eklendi
+    $password = $_POST['password'] ?? '';
     $hashed_password = null;
 
     if (empty($ad) || empty($soyad) || empty($telefon) || empty($uzmanlik_alani_1) || empty($pozisyon) || empty($baslama_tarihi) || empty($cinsiyet)) {
@@ -33,13 +28,12 @@ if (isset($_POST['ekle'])) {
         $error_message = "Geçerli bir e-posta adresi girin.";
     } else {
         try {
-            // E-posta benzersizliği kontrolü (isteğe bağlı ama önerilir)
             $stmt_check_email = $db->prepare("SELECT COUNT(*) FROM egitmenler WHERE email = ?");
             $stmt_check_email->execute([$email]);
             if ($stmt_check_email->fetchColumn() > 0) {
                 $error_message = "Bu e-posta adresi zaten kullanımda.";
             } else {
-                // Şifre varsa hashle
+                
                 if (!empty($password)) {
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                 }
@@ -48,7 +42,7 @@ if (isset($_POST['ekle'])) {
                 $stmt->execute([$ad, $soyad, $telefon, $email, $uzmanlik_alani_1, $pozisyon, $baslama_tarihi, $cinsiyet, $hashed_password]);
                 
                 $success_message = "Eğitmen başarıyla eklendi!";
-                header("Location: egitmenler.php?success=" . urlencode($success_message)); // Mesajı göstermek için yönlendirme
+                header("Location: egitmenler.php?success=" . urlencode($success_message));
                 exit;
             }
         } catch (PDOException $e) {
@@ -57,21 +51,19 @@ if (isset($_POST['ekle'])) {
     }
 }
 
-// Silme işlemi
 if (isset($_GET['sil'])) {
     $id = $_GET['sil'];
     try {
         $stmt = $db->prepare("DELETE FROM egitmenler WHERE egitmen_id = ?");
         $stmt->execute([$id]);
         $success_message = "Eğitmen başarıyla silindi!";
-        header("Location: egitmenler.php?success=" . urlencode($success_message)); // Silme sonrası sayfayı yenile
+        header("Location: egitmenler.php?success=" . urlencode($success_message));
         exit;
     } catch (PDOException $e) {
         $error_message = "Eğitmen silinirken bir hata oluştu: " . $e->getMessage();
     }
 }
 
-// Güncelleme verisi çekme (formu doldurmak için)
 $guncelle = null;
 if (isset($_GET['duzenle'])) {
     $id = $_GET['duzenle'];
@@ -110,24 +102,24 @@ if (isset($_POST['guncelle'])) {
         $error_message = "Geçerli bir e-posta adresi girin.";
     } else {
         try {
-            // E-posta benzersizliği kontrolü (kendisi hariç)
+    
             $stmt_check_email = $db->prepare("SELECT COUNT(*) FROM egitmenler WHERE email = ? AND egitmen_id != ?");
             $stmt_check_email->execute([$email, $id]);
             if ($stmt_check_email->fetchColumn() > 0) {
                 $error_message = "Bu e-posta adresi zaten başka bir eğitmene kayıtlı.";
             } else {
-                // Şifre alanı doldurulmuşsa güncelle
+                
                 if (!empty($password)) {
                     $hashed_password_for_update = password_hash($password, PASSWORD_DEFAULT);
                     $stmt = $db->prepare("UPDATE egitmenler SET ad=?, soyad=?, telefon=?, email=?, uzmanlik_alani_1=?, pozisyon=?, baslama_tarihi=?, cinsiyet=?, durum=?, password=? WHERE egitmen_id=?");
                     $stmt->execute([$ad, $soyad, $telefon, $email, $uzmanlik_alani_1, $pozisyon, $baslama_tarihi, $cinsiyet, $durum, $hashed_password_for_update, $id]);
-                } else { // Şifre alanı boş bırakılmışsa şifreyi güncelleme
+                } else { 
                     $stmt = $db->prepare("UPDATE egitmenler SET ad=?, soyad=?, telefon=?, email=?, uzmanlik_alani_1=?, pozisyon=?, baslama_tarihi=?, cinsiyet=?, durum=? WHERE egitmen_id=?");
                     $stmt->execute([$ad, $soyad, $telefon, $email, $uzmanlik_alani_1, $pozisyon, $baslama_tarihi, $cinsiyet, $durum, $id]);
                 }
                 
                 $success_message = "Eğitmen bilgileri başarıyla güncellendi!";
-                header("Location: egitmenler.php?success=" . urlencode($success_message)); // Mesajı göstermek için yönlendirme
+                header("Location: egitmenler.php?success=" . urlencode($success_message)); 
                 exit;
             }
         } catch (PDOException $e) {
@@ -136,7 +128,7 @@ if (isset($_POST['guncelle'])) {
     }
 }
 
-// Mesajları GET parametresinden al
+
 if (isset($_GET['success'])) {
     $success_message = htmlspecialchars($_GET['success']);
 }
@@ -145,24 +137,23 @@ if (isset($_GET['error'])) {
 }
 
 
-// Listeleme (Her zaman çalışır)
+
 try {
     $egitmenler = $db->query("SELECT egitmen_id, ad, soyad, telefon, email, uzmanlik_alani_1, pozisyon, baslama_tarihi, durum FROM egitmenler ORDER BY baslama_tarihi DESC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error_message = (isset($error_message) && !empty($error_message)) ? $error_message : "Eğitmen listesi çekilirken bir hata oluştu: " . $e->getMessage();
-    $egitmenler = []; // Hata durumunda boş liste
+    $egitmenler = []; 
 }
 
-// Uzmanlık alanı seçenekleri (MySQL ENUM'dan alınabilir veya manuel tanımlanabilir)
+
 $uzmanlik_alanlari = [
     'Yazılım Geliştirme', 'Web Tasarım', 'Robotik', 'Elektronik',
     'Veri Analizi', 'Siber Güvenlik', 'Mobil Uygulama', 'Oyun Geliştirme'
 ];
 
-// Pozisyon seçenekleri
+
 $pozisyonlar = ['Gönüllü', 'Yarı Zamanlı', 'Tam Zamanlı'];
 
-// Durum seçenekleri
 $durumlar = ['Aktif', 'İzinli', 'Ayrılmış'];
 
 ?>
