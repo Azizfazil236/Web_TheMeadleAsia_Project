@@ -165,7 +165,6 @@ $durumlar = ['Aktif', 'İzinli', 'Ayrılmış'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eğitmen Yönetimi - Bilge Nesil</title>
     <style>
-        /* CSS stilleri önceki dosyalarınızdaki ile tamamen uyumlu */
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; background: #f0f4f8; color: #1a3c5e; }
         .container { max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         h2, h3 { color: #007bff; text-align: center; margin-bottom: 25px; }
@@ -197,20 +196,20 @@ $durumlar = ['Aktif', 'İzinli', 'Ayrılmış'];
         .form-section input[type="text"],
         .form-section input[type="email"],
         .form-section input[type="date"],
-        .form-section input[type="password"], /* Şifre alanı için tip eklendi */
+        .form-section input[type="password"], 
         .form-section select {
-            width: calc(100% - 24px); /* Padding'i hesaba kat */
+            width: calc(100% - 24px);
             padding: 12px;
             margin-bottom: 15px;
             border: 1px solid #ced4da;
             border-radius: 8px;
             font-size: 16px;
-            box-sizing: border-box; /* Padding'i genişliğe dahil et */
+            box-sizing: border-box; 
         }
         .form-section input[type="submit"] {
-            width: auto; /* Otomatik genişlik */
+            width: auto;
             padding: 12px 25px;
-            background: linear-gradient(90deg, #28a745, #218838); /* Yeşil buton */
+            background: linear-gradient(90deg, #28a745, #218838); 
             color: white;
             border: none;
             border-radius: 8px;
@@ -332,7 +331,7 @@ $durumlar = ['Aktif', 'İzinli', 'Ayrılmış'];
                 <label for="baslama_tarihi">Başlama Tarihi:</label>
                 <input type="date" id="baslama_tarihi" name="baslama_tarihi" value="<?= htmlspecialchars($guncelle['baslama_tarihi'] ?? date('Y-m-d')) ?>" required><br>
 
-                <?php if ($guncelle): // Güncelleme modundaysa durum seçeneğini göster ?>
+                <?php if ($guncelle): 
                     <label for="durum">Durum:</label>
                     <select id="durum" name="durum" required>
                         <?php foreach ($durumlar as $d): ?>
